@@ -20,6 +20,12 @@ import {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
 
+// Helper to get the best available token (admin token takes priority in admin context)
+const getAuthToken = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('token') || localStorage.getItem('user_token') || null;
+};
+
 // In-browser fallback state store to support testing when backend server is offline
 class BrowserStateStore {
   private static STORAGE_KEY_PACKAGES = 'yt_packages';
@@ -117,9 +123,7 @@ async function fetchWithFallback<T>(
       ...options,
       headers: {
         'Content-Type': 'application/json',
-        ...(typeof window !== 'undefined' && localStorage.getItem('token')
-          ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          : {}),
+        ...(getAuthToken() ? { Authorization: `Bearer ${getAuthToken()}` } : {}),
         ...options.headers,
       },
     });
@@ -318,6 +322,27 @@ export const api = {
     return fetchWithFallback(`/orders/${orderNumber}`, { method: 'GET' }, () => {
       const orders = BrowserStateStore.getOrders();
       return orders.find((o) => o.orderNumber === orderNumber) || null;
+    });
+  },
+
+  // --- User Order History ---
+  async getUserOrders(): Promise<Order[]> {
+    return fetchWithFallback('/orders/my-orders', { method: 'GET' }, () => {
+      const orders = BrowserStateStore.getOrders();
+      if (typeof window !== 'undefined') {
+        const userStr = localStorage.getItem('user_profile');
+        if (userStr) {
+          try {
+            const user = JSON.parse(userStr);
+            if (user?.email) {
+              return orders.filter(
+                (o) => o.customerEmail?.toLowerCase() === user.email.toLowerCase()
+              );
+            }
+          } catch {}
+        }
+      }
+      return orders;
     });
   },
 

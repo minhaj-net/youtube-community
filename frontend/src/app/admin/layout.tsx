@@ -27,10 +27,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
+    if (pathname === '/admin/login') return;
     if (!isLoading && !isAuthenticated) {
-      router.push('/login');
+      router.replace('/admin/login');
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, router, pathname]);
+
+  // If on admin login page, render children directly without admin layout sidebar
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return (

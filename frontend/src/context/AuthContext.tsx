@@ -42,9 +42,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    await api.adminLogout();
-    setAdmin(null);
-    router.push('/login');
+    try {
+      await api.adminLogout();
+    } catch {
+      // ignore
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('yt_admin_session');
+      sessionStorage.clear();
+      setAdmin(null);
+      if (typeof window !== 'undefined') {
+        window.location.replace('/admin/login?logged_out=true');
+      } else {
+        router.push('/admin/login');
+      }
+    }
   };
 
   return (

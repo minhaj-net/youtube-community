@@ -228,13 +228,19 @@ function OrderConfirmationContent() {
             </div>
           </div>
 
-          <div className="text-center pt-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <Link
+              href="/dashboard"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#FF1744] hover:bg-[#E00034] text-white font-bold text-sm shadow-lg shadow-red-500/25 transition flex items-center justify-center gap-2"
+            >
+              <span>View in My Orders Dashboard</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-white transition"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold text-sm transition text-center"
             >
-              <span>Back to TubeBoost Homepage</span>
-              <ArrowRight className="w-4 h-4" />
+              Back to TubeBoost Homepage
             </Link>
           </div>
         </div>

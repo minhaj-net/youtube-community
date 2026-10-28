@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
+import { useUserAuth } from '@/context/UserAuthContext';
 import { useToast } from '@/context/ToastContext';
 import { api } from '@/lib/api';
 import {
@@ -21,11 +22,21 @@ import { YoutubeIcon } from '@/components/icons/YoutubeIcon';
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, subtotal, clearCart, isCartLoaded } = useCart();
+  const { user } = useUserAuth();
   const { error: toastError, success: toastSuccess } = useToast();
 
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+
+  // Auto-prefill customer info if logged in
+  useEffect(() => {
+    if (user) {
+      if (user.name) setFullName(user.name);
+      if (user.email) setEmail(user.email);
+      if (user.phone) setPhone(user.phone);
+    }
+  }, [user]);
   const [targetUrl, setTargetUrl] = useState('');
   const [instructions, setInstructions] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);

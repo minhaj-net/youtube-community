@@ -1,13 +1,6 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/Providers';
-
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-});
 
 export const metadata: Metadata = {
   title: 'TubeBoost Marketplace — Creator Services & YouTube Growth Platform',
@@ -37,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased dark`}>
+    <html lang="en" className="h-full antialiased dark">
       <body className="min-h-full flex flex-col bg-[#050B14] text-slate-100 font-sans selection:bg-[#FF1744] selection:text-white">
         <Providers>{children}</Providers>
       </body>
