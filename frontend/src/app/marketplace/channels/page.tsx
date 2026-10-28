@@ -6,7 +6,7 @@ import { Footer } from '@/components/Footer';
 import { ChannelCard } from '@/components/ChannelCard';
 import { api } from '@/lib/api';
 import { ChannelListing } from '@/types';
-import { Search, ShieldCheck, DollarSign, Users, Info } from 'lucide-react';
+import { Search, ShieldCheck, DollarSign, Users, Info, AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function ChannelsMarketplacePage() {
   const [channels, setChannels] = useState<ChannelListing[]>([]);
@@ -14,9 +14,23 @@ export default function ChannelsMarketplacePage() {
   const [monetizedOnly, setMonetizedOnly] = useState(false);
   const [selectedNiche, setSelectedNiche] = useState('All');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchChannels = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.getChannels();
+      setChannels(data);
+    } catch (err: any) {
+      setError(err?.message || 'Failed to load channels from database.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    api.getChannels().then(setChannels).finally(() => setLoading(false));
+    fetchChannels();
   }, []);
 
   const niches = ['All', 'Tech & Gadgets', 'Gaming', 'Food & Lifestyle', 'Personal Finance'];
@@ -59,33 +73,33 @@ export default function ChannelsMarketplacePage() {
           <div className="mb-10 p-4 rounded-2xl bg-[#091120] border border-slate-800 flex items-start gap-3.5 text-xs text-slate-300">
             <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
             <div>
-              <strong className="text-white block mb-0.5">Ownership Transfer Compliance Notice:</strong>
-              YouTube account ownership transfers must strictly follow YouTube’s official primary owner delegation procedure (via YouTube Studio Brand Account permissions). TubeBoost provides step-by-step verified escrow transition support.
+              <span className="font-bold text-white block mb-0.5">YouTube Ownership Transfer Guarantee</span>
+              All channel transactions follow YouTube’s official primary owner transfer procedure with escrow protection. Funds are safely held until owner status transitions seamlessly.
             </div>
           </div>
 
-          {/* Search & Filter Bar */}
-          <div className="mb-10 p-6 rounded-3xl bg-[#0C1527] border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
+          {/* Controls Bar */}
+          <div className="mb-10 p-4 sm:p-6 rounded-3xl bg-[#0C1527] border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="relative flex-1 w-full">
               <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search channel titles, niches, or keywords..."
+                placeholder="Search channels by name, niche, keywords..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-2xl bg-[#050B14] border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 transition"
+                className="w-full pl-12 pr-4 py-3 rounded-2xl bg-[#050B14] border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#FF1744] transition"
               />
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-              <label className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-[#050B14] border border-slate-800 text-sm text-slate-200 cursor-pointer select-none">
+            <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+              <label className="flex items-center gap-2 text-xs sm:text-sm text-slate-300 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={monetizedOnly}
                   onChange={(e) => setMonetizedOnly(e.target.checked)}
-                  className="rounded text-[#FF1744] focus:ring-0 w-4 h-4"
+                  className="rounded border-slate-700 text-[#FF1744] focus:ring-0 focus:ring-offset-0 bg-[#050B14] w-4 h-4"
                 />
-                <span className="font-medium text-xs">Monetized Only</span>
+                <span>Monetized Only</span>
               </label>
 
               <select
@@ -100,8 +114,28 @@ export default function ChannelsMarketplacePage() {
             </div>
           </div>
 
-          {/* Grid */}
-          {filteredChannels.length > 0 ? (
+          {/* Grid / Content Area */}
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 bg-[#0A1120] rounded-3xl border border-slate-800">
+              <div className="w-10 h-10 border-4 border-[#FF1744] border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-slate-400 text-sm">Loading channels from database...</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-16 px-4 bg-[#0A1120] rounded-3xl border border-rose-500/30 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center mb-4">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Unable to load channels</h3>
+              <p className="text-slate-400 text-sm max-w-md mb-6">{error}</p>
+              <button
+                onClick={fetchChannels}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#FF1744] text-white font-bold text-xs shadow-lg shadow-red-500/20 transition cursor-pointer"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry
+              </button>
+            </div>
+          ) : filteredChannels.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredChannels.map((channel) => (
                 <ChannelCard key={channel._id} channel={channel} />
@@ -116,7 +150,7 @@ export default function ChannelsMarketplacePage() {
                   setMonetizedOnly(false);
                   setSelectedNiche('All');
                 }}
-                className="px-5 py-2.5 rounded-xl bg-[#FF1744] text-white text-xs font-bold"
+                className="px-5 py-2.5 rounded-xl bg-[#FF1744] text-white text-xs font-bold cursor-pointer"
               >
                 Reset Search
               </button>

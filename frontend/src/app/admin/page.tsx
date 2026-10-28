@@ -15,20 +15,56 @@ import {
   Tv,
   Film,
   ExternalLink,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadStats = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.getAdminDashboard();
+      setStats(data);
+    } catch (err: any) {
+      setError(err?.message || 'Failed to fetch dashboard metrics');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    api.getAdminDashboard().then(setStats).finally(() => setLoading(false));
+    loadStats();
   }, []);
 
-  if (loading || !stats) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
         <div className="w-10 h-10 border-4 border-[#FF1744] border-t-transparent rounded-full animate-spin" />
+        <p className="text-slate-400 text-sm">Loading admin metrics...</p>
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] p-8 rounded-3xl bg-[#0C1527] border border-rose-500/30 text-center max-w-md mx-auto my-12">
+        <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center mb-4">
+          <AlertCircle className="w-6 h-6" />
+        </div>
+        <h3 className="text-lg font-bold text-white mb-2">Failed to load platform metrics</h3>
+        <p className="text-slate-400 text-sm mb-6">{error || 'Server error occurred'}</p>
+        <button
+          onClick={loadStats}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#FF1744] text-white font-bold text-xs shadow-lg shadow-red-500/20 transition cursor-pointer"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Retry Loading
+        </button>
       </div>
     );
   }

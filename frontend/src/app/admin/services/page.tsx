@@ -208,62 +208,77 @@ export default function AdminServicesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
-              {filtered.map((srv) => (
-                <tr key={srv._id} className="hover:bg-slate-800/20 transition">
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={srv.image}
-                        alt={srv.name}
-                        className="w-10 h-10 rounded-xl object-cover border border-slate-700 shrink-0"
-                      />
-                      <div>
-                        <span className="font-bold text-white block">{srv.name}</span>
-                        <span className="text-[11px] text-slate-400 font-mono">{srv.slug}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4 font-medium text-slate-300">{srv.category}</td>
-                  <td className="p-4 font-bold text-white">৳{srv.price.toLocaleString()}</td>
-                  <td className="p-4">
-                    {srv.isFeatured ? (
-                      <span className="bg-[#FF1744]/20 text-[#FF1744] text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-                        <Star className="w-3 h-3 fill-current" />
-                        Featured
-                      </span>
-                    ) : (
-                      <span className="text-slate-500">—</span>
-                    )}
-                  </td>
-                  <td className="p-4">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                        srv.isActive
-                          ? 'bg-emerald-500/20 text-emerald-400'
-                          : 'bg-slate-800 text-slate-400'
-                      }`}
-                    >
-                      {srv.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="p-4 text-right space-x-2">
-                    <button
-                      onClick={() => openEditModal(srv)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
-                      title="Edit Service"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(srv._id, srv.name)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition"
-                      title="Delete Service"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-slate-400">
+                    <div className="w-6 h-6 border-2 border-[#FF1744] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                    <span>Loading creator services from database...</span>
                   </td>
                 </tr>
-              ))}
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-slate-400">
+                    No creator services found in database.
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((srv) => (
+                  <tr key={srv._id} className="hover:bg-slate-800/20 transition">
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={srv.image}
+                          alt={srv.name}
+                          className="w-10 h-10 rounded-xl object-cover border border-slate-700 shrink-0"
+                        />
+                        <div>
+                          <span className="font-bold text-white block">{srv.name}</span>
+                          <span className="text-[11px] text-slate-400 font-mono">{srv.slug}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4 font-medium text-slate-300">{srv.category}</td>
+                    <td className="p-4 font-bold text-white">৳{srv.price.toLocaleString()}</td>
+                    <td className="p-4">
+                      {srv.isFeatured ? (
+                        <span className="bg-[#FF1744]/20 text-[#FF1744] text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                          <Star className="w-3 h-3 fill-current" />
+                          Featured
+                        </span>
+                      ) : (
+                        <span className="text-slate-500">—</span>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                          srv.isActive
+                            ? 'bg-emerald-500/20 text-emerald-400'
+                            : 'bg-slate-800 text-slate-400'
+                        }`}
+                      >
+                        {srv.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="p-4 text-right space-x-2">
+                      <button
+                        onClick={() => openEditModal(srv)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                        title="Edit Service"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(srv._id, srv.name)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition"
+                        title="Delete Service"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

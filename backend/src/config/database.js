@@ -5,15 +5,47 @@ try {
   dns.setServers(['1.1.1.1', '8.8.8.8']);
 } catch (e) {}
 
+// Global cached connection for serverless execution environments
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
 const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+  // If connection is already open and ready, reuse it immediately
+  if (mongoose.connection.readyState === 1) {
+    if (!cached.conn) cached.conn = mongoose;
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    const opts = {
       serverSelectionTimeoutMS: 5000,
-    });
-    console.log(`✅ MongoDB connected: ${conn.connection.host}`);
+    };
+
+    cached.promise = mongoose
+      .connect(process.env.MONGODB_URI, opts)
+      .then((m) => {
+        console.log(`✅ MongoDB connected: ${m.connection.host}`);
+        return m;
+      })
+      .catch((err) => {
+        // Reset cached promise so subsequent requests can retry
+        cached.promise = null;
+        cached.conn = null;
+        throw err;
+      });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+    return cached.conn;
   } catch (err) {
+    cached.promise = null;
+    cached.conn = null;
     console.error(`❌ MongoDB connection failed: ${err.message}`);
-    process.exit(1);
+    throw err;
   }
 };
 

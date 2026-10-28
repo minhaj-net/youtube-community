@@ -14,6 +14,7 @@ const orderRoutes = require('./routes/orders');
 const adminRoutes = require('./routes/admin');
 const { getSiteSettings } = require('./controllers/siteSettingsController');
 const errorHandler = require('./middleware/errorHandler');
+const connectDB = require('./config/database');
 
 const app = express();
 
@@ -65,6 +66,16 @@ if (process.env.NODE_ENV !== 'production') {
 
 app.get('/api/v1/health', (req, res) => {
   res.json({ success: true, message: 'YouTube Marketplace API is running', timestamp: new Date() });
+});
+
+// Middleware to ensure MongoDB connection is established before DB routes execute
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.use('/api/v1/auth', authRoutes);

@@ -33,10 +33,15 @@ function ServiceDetailContent() {
 
   useEffect(() => {
     if (slug) {
-      api.getServiceBySlug(slug).then((res) => {
-        setService(res);
-        setLoading(false);
-      });
+      api.getServiceBySlug(slug)
+        .then((res) => {
+          setService(res);
+          setLoading(false);
+        })
+        .catch(() => {
+          setService(null);
+          setLoading(false);
+        });
     }
   }, [slug]);
 

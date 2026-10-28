@@ -7,14 +7,28 @@ import { Footer } from '@/components/Footer';
 import { PackageCard } from '@/components/PackageCard';
 import { api } from '@/lib/api';
 import { PackageItem } from '@/types';
-import { Sparkles, ShieldCheck, CheckCircle2, Zap, HelpCircle } from 'lucide-react';
+import { Sparkles, ShieldCheck, CheckCircle2, Zap, HelpCircle, AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function PackagesPage() {
   const [packages, setPackages] = useState<PackageItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchPackages = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.getPackages();
+      setPackages(data);
+    } catch (err: any) {
+      setError(err?.message || 'Failed to load growth packages from database.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    api.getPackages().then(setPackages).finally(() => setLoading(false));
+    fetchPackages();
   }, []);
 
   return (
@@ -52,12 +66,38 @@ export default function PackagesPage() {
             </span>
           </div>
 
-          {/* Packages Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch mb-20">
-            {packages.map((pkg) => (
-              <PackageCard key={pkg._id} pkg={pkg} />
-            ))}
-          </div>
+          {/* Packages Content Area */}
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 bg-[#091120] rounded-3xl border border-slate-800 mb-20">
+              <div className="w-10 h-10 border-4 border-[#FF1744] border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-slate-400 text-sm">Loading growth packages from database...</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-16 px-4 bg-[#091120] rounded-3xl border border-rose-500/30 mb-20 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center mb-4">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Unable to load packages</h3>
+              <p className="text-slate-400 text-sm max-w-md mb-6">{error}</p>
+              <button
+                onClick={fetchPackages}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#FF1744] text-white font-bold text-xs shadow-lg shadow-red-500/20 transition cursor-pointer"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry
+              </button>
+            </div>
+          ) : packages.length === 0 ? (
+            <div className="text-center py-20 bg-[#091120] rounded-3xl border border-slate-800 mb-20">
+              <p className="text-slate-400 text-base">No growth packages currently available in the database.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch mb-20">
+              {packages.map((pkg) => (
+                <PackageCard key={pkg._id} pkg={pkg} />
+              ))}
+            </div>
+          )}
 
           {/* Additional Package Specs / Comparison */}
           <div className="p-8 sm:p-10 rounded-3xl bg-[#091120] border border-slate-800">

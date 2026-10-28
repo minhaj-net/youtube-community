@@ -31,13 +31,16 @@ function OrderConfirmationContent() {
 
   useEffect(() => {
     if (orderId) {
-      Promise.all([api.getOrderByNumber(orderId), api.getSiteSettings()]).then(
-        ([ord, sett]) => {
+      Promise.all([api.getOrderByNumber(orderId), api.getSiteSettings()])
+        .then(([ord, sett]) => {
           setOrder(ord);
           setSettings(sett);
           setLoading(false);
-        }
-      );
+        })
+        .catch(() => {
+          setOrder(null);
+          setLoading(false);
+        });
     }
   }, [orderId]);
 

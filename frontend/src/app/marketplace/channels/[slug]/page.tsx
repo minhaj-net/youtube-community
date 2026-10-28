@@ -32,13 +32,16 @@ function ChannelDetailContent() {
 
   useEffect(() => {
     if (slug) {
-      Promise.all([api.getChannelBySlug(slug), api.getSiteSettings()]).then(
-        ([chn, sett]) => {
+      Promise.all([api.getChannelBySlug(slug), api.getSiteSettings()])
+        .then(([chn, sett]) => {
           setChannel(chn);
           setSettings(sett);
           setLoading(false);
-        }
-      );
+        })
+        .catch(() => {
+          setChannel(null);
+          setLoading(false);
+        });
     }
   }, [slug]);
 

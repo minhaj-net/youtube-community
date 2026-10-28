@@ -185,55 +185,70 @@ export default function AdminPackagesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
-              {filtered.map((pkg) => (
-                <tr key={pkg._id} className="hover:bg-slate-800/20 transition">
-                  <td className="p-4">
-                    <span className="font-bold text-white block">{pkg.name}</span>
-                    <span className="text-[11px] text-slate-400 font-mono">{pkg.slug}</span>
-                  </td>
-                  <td className="p-4 font-semibold text-slate-300">
-                    {pkg.quantity.toLocaleString()} Units
-                  </td>
-                  <td className="p-4 font-bold text-white">৳{pkg.price.toLocaleString()}</td>
-                  <td className="p-4">
-                    {pkg.isFeatured ? (
-                      <span className="bg-[#FF1744]/20 text-[#FF1744] text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-                        <Star className="w-3 h-3 fill-current" />
-                        Featured
-                      </span>
-                    ) : (
-                      <span className="text-slate-500">—</span>
-                    )}
-                  </td>
-                  <td className="p-4">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                        pkg.isActive
-                          ? 'bg-emerald-500/20 text-emerald-400'
-                          : 'bg-slate-800 text-slate-400'
-                      }`}
-                    >
-                      {pkg.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="p-4 text-right space-x-2">
-                    <button
-                      onClick={() => openEditModal(pkg)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
-                      title="Edit Package"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(pkg._id, pkg.name)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition"
-                      title="Delete Package"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-slate-400">
+                    <div className="w-6 h-6 border-2 border-[#FF1744] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                    <span>Loading package tiers from database...</span>
                   </td>
                 </tr>
-              ))}
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-slate-400">
+                    No package tiers found in database.
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((pkg) => (
+                  <tr key={pkg._id} className="hover:bg-slate-800/20 transition">
+                    <td className="p-4">
+                      <span className="font-bold text-white block">{pkg.name}</span>
+                      <span className="text-[11px] text-slate-400 font-mono">{pkg.slug}</span>
+                    </td>
+                    <td className="p-4 font-semibold text-slate-300">
+                      {pkg.quantity.toLocaleString()} Units
+                    </td>
+                    <td className="p-4 font-bold text-white">৳{pkg.price.toLocaleString()}</td>
+                    <td className="p-4">
+                      {pkg.isFeatured ? (
+                        <span className="bg-[#FF1744]/20 text-[#FF1744] text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                          <Star className="w-3 h-3 fill-current" />
+                          Featured
+                        </span>
+                      ) : (
+                        <span className="text-slate-500">—</span>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                          pkg.isActive
+                            ? 'bg-emerald-500/20 text-emerald-400'
+                            : 'bg-slate-800 text-slate-400'
+                        }`}
+                      >
+                        {pkg.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="p-4 text-right space-x-2">
+                      <button
+                        onClick={() => openEditModal(pkg)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                        title="Edit Package"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(pkg._id, pkg.name)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition"
+                        title="Delete Package"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

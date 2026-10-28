@@ -6,7 +6,7 @@ import { Footer } from '@/components/Footer';
 import { ServiceCard } from '@/components/ServiceCard';
 import { api } from '@/lib/api';
 import { ServiceItem } from '@/types';
-import { Search, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { Search, SlidersHorizontal, Sparkles, AlertCircle, RefreshCw } from 'lucide-react';
 
 const CATEGORIES = [
   'All',
@@ -24,9 +24,23 @@ export default function ServicesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc'>('featured');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchServices = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.getServices();
+      setServices(data);
+    } catch (err: any) {
+      setError(err?.message || 'Failed to load services from database.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    api.getServices().then(setServices).finally(() => setLoading(false));
+    fetchServices();
   }, []);
 
   const filteredServices = useMemo(() => {
@@ -124,8 +138,28 @@ export default function ServicesPage() {
             ))}
           </div>
 
-          {/* Services Grid */}
-          {filteredServices.length > 0 ? (
+          {/* Services Content Area */}
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 bg-[#0A1120] rounded-3xl border border-slate-800">
+              <div className="w-10 h-10 border-4 border-[#FF1744] border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-slate-400 text-sm">Loading services from database...</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-16 px-4 bg-[#0A1120] rounded-3xl border border-rose-500/30 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center mb-4">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Unable to load services</h3>
+              <p className="text-slate-400 text-sm max-w-md mb-6">{error}</p>
+              <button
+                onClick={fetchServices}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#FF1744] text-white font-bold text-xs shadow-lg shadow-red-500/20 transition cursor-pointer"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry
+              </button>
+            </div>
+          ) : filteredServices.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredServices.map((service) => (
                 <ServiceCard key={service._id} service={service} />

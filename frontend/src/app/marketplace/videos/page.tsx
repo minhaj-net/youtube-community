@@ -6,16 +6,30 @@ import { Footer } from '@/components/Footer';
 import { VideoCard } from '@/components/VideoCard';
 import { api } from '@/lib/api';
 import { VideoListing } from '@/types';
-import { Search, Film, ShieldCheck } from 'lucide-react';
+import { Search, Film, ShieldCheck, AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function VideosMarketplacePage() {
   const [videos, setVideos] = useState<VideoListing[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchVideos = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.getVideos();
+      setVideos(data);
+    } catch (err: any) {
+      setError(err?.message || 'Failed to load video assets from database.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    api.getVideos().then(setVideos).finally(() => setLoading(false));
+    fetchVideos();
   }, []);
 
   const categories = ['All', 'Cinematic B-Roll', 'Turnkey Faceless Videos', 'Nature & Landscapes'];
@@ -61,22 +75,22 @@ export default function VideosMarketplacePage() {
               <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search turnkey videos, b-roll, 4K footage..."
+                placeholder="Search turnkey videos by topic, mood, or tags..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-2xl bg-[#050B14] border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-purple-500 transition"
+                className="w-full pl-12 pr-4 py-3 rounded-2xl bg-[#050B14] border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#FF1744] transition"
               />
             </div>
 
-            <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto">
+            <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none">
               {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-4 py-2.5 rounded-2xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                  className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
                     selectedCategory === cat
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-[#050B14] text-slate-300 hover:text-white border border-slate-800'
+                      ? 'bg-[#FF1744] text-white shadow-md shadow-red-500/20'
+                      : 'bg-[#0E1726] text-slate-300 hover:text-white hover:bg-slate-800'
                   }`}
                 >
                   {cat}
@@ -85,8 +99,28 @@ export default function VideosMarketplacePage() {
             </div>
           </div>
 
-          {/* Grid */}
-          {filteredVideos.length > 0 ? (
+          {/* Grid / Content Area */}
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 bg-[#0A1120] rounded-3xl border border-slate-800">
+              <div className="w-10 h-10 border-4 border-[#FF1744] border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-slate-400 text-sm">Loading video assets from database...</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-16 px-4 bg-[#0A1120] rounded-3xl border border-rose-500/30 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center mb-4">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Unable to load videos</h3>
+              <p className="text-slate-400 text-sm max-w-md mb-6">{error}</p>
+              <button
+                onClick={fetchVideos}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#FF1744] text-white font-bold text-xs shadow-lg shadow-red-500/20 transition cursor-pointer"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry
+              </button>
+            </div>
+          ) : filteredVideos.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredVideos.map((video) => (
                 <VideoCard key={video._id} video={video} />
@@ -100,7 +134,7 @@ export default function VideosMarketplacePage() {
                   setSearchQuery('');
                   setSelectedCategory('All');
                 }}
-                className="px-5 py-2.5 rounded-xl bg-[#FF1744] text-white text-xs font-bold"
+                className="px-5 py-2.5 rounded-xl bg-[#FF1744] text-white text-xs font-bold cursor-pointer"
               >
                 Reset Filters
               </button>

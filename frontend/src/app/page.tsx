@@ -42,10 +42,10 @@ export default function HomePage() {
     async function loadData() {
       try {
         const [pkgs, srvs, chns, vids] = await Promise.all([
-          api.getPackages(),
-          api.getFeaturedServices(),
-          api.getChannels(),
-          api.getVideos(),
+          api.getPackages().catch(() => []),
+          api.getFeaturedServices().catch(() => []),
+          api.getChannels().catch(() => []),
+          api.getVideos().catch(() => []),
         ]);
         setPackages(pkgs);
         setServices(srvs);
@@ -278,11 +278,21 @@ export default function HomePage() {
             </div>
 
             {/* Grid of Packages */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
-              {packages.slice(0, 4).map((pkg) => (
-                <PackageCard key={pkg._id} pkg={pkg} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex items-center justify-center py-16 bg-[#091120] rounded-3xl border border-slate-800">
+                <div className="w-8 h-8 border-4 border-[#FF1744] border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : packages.length === 0 ? (
+              <div className="text-center py-16 bg-[#091120] rounded-3xl border border-slate-800">
+                <p className="text-slate-400 text-sm">No audience growth packages currently listed in the database.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
+                {packages.slice(0, 4).map((pkg) => (
+                  <PackageCard key={pkg._id} pkg={pkg} />
+                ))}
+              </div>
+            )}
 
             {/* View all packages button */}
             <div className="mt-12 text-center">
@@ -323,11 +333,21 @@ export default function HomePage() {
             </div>
 
             {/* Clean Light-surface Cards Section for Visual Contrast */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {services.slice(0, 3).map((srv) => (
-                <ServiceCard key={srv._id} service={srv} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex items-center justify-center py-16 bg-[#091120] rounded-3xl border border-slate-800">
+                <div className="w-8 h-8 border-4 border-[#FF1744] border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : services.length === 0 ? (
+              <div className="text-center py-16 bg-[#091120] rounded-3xl border border-slate-800">
+                <p className="text-slate-400 text-sm">No featured creator services currently listed in the database.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {services.slice(0, 3).map((srv) => (
+                  <ServiceCard key={srv._id} service={srv} />
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
@@ -356,11 +376,21 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {channels.slice(0, 3).map((channel) => (
-                <ChannelCard key={channel._id} channel={channel} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex items-center justify-center py-16 bg-[#091120] rounded-3xl border border-slate-800">
+                <div className="w-8 h-8 border-4 border-[#FF1744] border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : channels.length === 0 ? (
+              <div className="text-center py-16 bg-[#091120] rounded-3xl border border-slate-800">
+                <p className="text-slate-400 text-sm">No verified channels currently listed in the database.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {channels.slice(0, 3).map((channel) => (
+                  <ChannelCard key={channel._id} channel={channel} />
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
@@ -389,11 +419,21 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {videos.slice(0, 3).map((vid) => (
-                <VideoCard key={vid._id} video={vid} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex items-center justify-center py-16 bg-[#091120] rounded-3xl border border-slate-800">
+                <div className="w-8 h-8 border-4 border-[#FF1744] border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : videos.length === 0 ? (
+              <div className="text-center py-16 bg-[#091120] rounded-3xl border border-slate-800">
+                <p className="text-slate-400 text-sm">No turnkey video assets currently listed in the database.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {videos.slice(0, 3).map((vid) => (
+                  <VideoCard key={vid._id} video={vid} />
+                ))}
+              </div>
+            )}
           </div>
         </section>
 

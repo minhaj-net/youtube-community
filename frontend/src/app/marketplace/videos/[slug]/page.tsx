@@ -32,10 +32,15 @@ function VideoDetailContent() {
 
   useEffect(() => {
     if (slug) {
-      api.getVideoBySlug(slug).then((res) => {
-        setVideo(res);
-        setLoading(false);
-      });
+      api.getVideoBySlug(slug)
+        .then((res) => {
+          setVideo(res);
+          setLoading(false);
+        })
+        .catch(() => {
+          setVideo(null);
+          setLoading(false);
+        });
     }
   }, [slug]);
 

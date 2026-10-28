@@ -27,6 +27,7 @@ export default function AdminOrdersPage() {
   const { success, error: toastError } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -35,11 +36,15 @@ export default function AdminOrdersPage() {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const fetchOrders = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const data = await api.getAdminOrders(statusFilter, search);
       setOrders(data);
-    } catch {
-      toastError('Failed to fetch orders');
+    } catch (err: any) {
+      const msg = err?.message || 'Failed to fetch orders from database';
+      setError(msg);
+      toastError(msg);
     } finally {
       setLoading(false);
     }
@@ -189,7 +194,19 @@ export default function AdminOrdersPage() {
       {loading ? (
         <div className="py-24 text-center">
           <div className="w-10 h-10 border-4 border-[#FF1744] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-sm text-slate-400">Loading orders...</p>
+          <p className="text-sm text-slate-400">Loading orders from database...</p>
+        </div>
+      ) : error ? (
+        <div className="p-12 text-center rounded-3xl bg-[#091120] border border-rose-500/30">
+          <AlertCircle className="w-12 h-12 text-rose-500 mx-auto mb-3" />
+          <h3 className="text-base font-bold text-white mb-1">Failed to fetch orders</h3>
+          <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">{error}</p>
+          <button
+            onClick={fetchOrders}
+            className="px-4 py-2 rounded-xl bg-[#FF1744] text-white text-xs font-bold transition shadow"
+          >
+            Retry
+          </button>
         </div>
       ) : orders.length === 0 ? (
         <div className="p-12 text-center rounded-3xl bg-[#091120] border border-slate-800">
