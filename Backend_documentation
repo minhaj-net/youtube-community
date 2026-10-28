@@ -1,0 +1,597 @@
+# MASTER PROMPT — YOUTUBE MARKETPLACE BACKEND
+
+## 1. Project Objective
+
+Build a secure, maintainable, production-oriented REST API for a YouTube Marketplace website.
+
+The frontend will use Next.js. The backend will use Node.js, Express.js, MongoDB, and Mongoose.
+
+The application will support:
+- Dynamic YouTube audience-growth packages
+- Creator services
+- YouTube channel marketplace listings
+- YouTube video marketplace listings
+- Guest checkout
+- Order creation and management
+- Admin dashboard statistics
+- Admin authentication and authorization
+- Basic website settings
+
+The website needs a minimal admin CMS, not a complex page builder.
+
+## 2. Mandatory Agentic Workflow
+
+Follow these steps strictly:
+
+1. Analyze the existing backend repository before modifying anything.
+2. Inspect package.json, folder structure, routes, models, middleware, environment variables, and current implementation.
+3. Identify existing conventions and reuse working code.
+4. Prepare an architecture summary and detailed TODO checklist.
+5. Define the API contract that the frontend will consume.
+6. Implement the project in small, verifiable phases.
+7. Test each phase before continuing.
+8. Update the TODO checklist after each completed phase.
+9. Report completed tasks, test results, unresolved issues, and the next phase.
+10. Never claim an endpoint or feature works without verifying it.
+
+Do not overwrite an existing working application or rewrite unrelated modules unnecessarily.
+
+After completing the analysis and plan, continue implementation without waiting for approval unless a genuine blocker exists.
+
+## 3. Technology Stack
+
+- Node.js
+- Express.js
+- TypeScript if compatible with the existing project; otherwise preserve the established JavaScript convention
+- MongoDB
+- Mongoose
+- Zod or an equivalent request-validation library
+- Secure admin authentication using an appropriate JWT/cookie strategy
+- argon2 or bcrypt for password hashing
+- Centralized error handling
+- Structured logging
+- Rate limiting
+- CORS configuration
+- Helmet
+- Cloudinary or another suitable image-storage provider
+
+Reuse existing dependencies wherever possible. Avoid unnecessary packages.
+
+## 4. Architecture and Folder Organization
+
+Use a clear, modular architecture appropriate for the existing project.
+
+A possible structure:
+
+src/
+  config/
+  models/
+  routes/
+  controllers/
+  services/
+  middleware/
+  validators/
+  utils/
+  types/
+  app.ts
+  server.ts
+
+Separate routing, validation, business logic, database models, and error handling.
+
+Do not put all application logic in one large file.
+
+## 5. MongoDB Connection
+
+Implement:
+- Environment-based MongoDB connection
+- Connection failure handling
+- Graceful shutdown
+- Appropriate connection logging
+- Indexes for frequently queried fields
+- Proper validation and consistent error responses
+
+Use `MONGODB_URI` from the backend environment.
+
+Provide `.env.example` with placeholders only.
+
+Never commit credentials or hardcode MongoDB connection strings.
+
+Do not expose MongoDB credentials or administrative database access to the frontend.
+
+## 6. Data Models
+
+Design and implement appropriate Mongoose schemas.
+
+### A. Admin
+
+Fields may include:
+- email
+- passwordHash
+- role
+- isActive
+- createdAt
+- updatedAt
+- lastLoginAt
+
+Requirements:
+- Secure password hashing
+- Unique email index
+- Only authorized administrators can access admin operations
+- Prevent unauthorized public admin registration
+- Provide a safe initial admin-creation procedure using a controlled seed script or setup command
+
+Never ship a hardcoded default production password.
+
+### B. Package
+
+Fields:
+- name
+- slug
+- description
+- category
+- quantity or package units
+- price
+- currency
+- image
+- features
+- isFeatured
+- isActive
+- sortOrder
+- timestamps
+
+Requirements:
+- Validate prices and quantities
+- Enforce unique slugs where appropriate
+- Allow admin CRUD
+- Public API returns only active packages
+- Support featured-package filtering and ordering
+
+Initial seed values, if requested:
+- 100 units: ৳160
+- 250 units: ৳400
+- 500 units: ৳800
+- 1,000 units: ৳1,600
+- 2,500 units: ৳4,000
+- 5,000 units: ৳8,000
+- 10,000 units: ৳16,000
+
+Treat these as configurable seed data, not immutable business rules.
+
+Package offerings must represent compliant audience-growth or promotional services. Do not implement fake engagement or bot-driven subscriber delivery.
+
+### C. Service
+
+Fields:
+- name
+- slug
+- description
+- category
+- price or startingPrice
+- currency
+- image
+- features
+- deliveryInformation where applicable
+- isFeatured
+- isActive
+- sortOrder
+- timestamps
+
+Requirements:
+- Admin CRUD
+- Input validation
+- Public active-service listing
+- Details by slug or ID
+- Pagination, search, and category filters
+
+### D. Order
+
+Fields:
+- orderNumber or public order ID
+- customer name
+- customer phone
+- customer email
+- order items
+- applicable YouTube channel/video URL
+- customer instructions
+- subtotal
+- discount where applicable
+- total
+- currency
+- payment method if configured
+- payment status
+- order status
+- status history if useful
+- createdAt
+- updatedAt
+
+Each order item should preserve a snapshot of the purchased item's name, identifier, unit price, quantity, and subtotal at order time.
+
+Requirements:
+- The backend recalculates every price and subtotal.
+- Never trust a client-submitted price, discount, or total.
+- Verify that all submitted item IDs exist and are purchasable.
+- Validate quantities.
+- Reject inactive or unavailable items.
+- Generate unique, non-guessable public order identifiers where appropriate.
+- Prevent duplicate order creation when a request is retried, using a suitable idempotency strategy.
+- Save the order only after server-side validation.
+- Never expose other customers' sensitive order data through public endpoints.
+
+The initial system can support guest checkout. Do not introduce a customer account system unless required by the existing application.
+
+### E. Marketplace Listing
+
+Support channel and video listings using either separate models or a well-designed shared model with clear validation. Choose the simplest maintainable option.
+
+Fields may include:
+- listingType: channel or video
+- title
+- slug
+- description
+- category
+- image/thumbnail
+- price
+- currency
+- seller contact details if needed
+- listing-specific metadata
+- status: draft, published, or archived
+- createdAt
+- updatedAt
+
+Requirements:
+- Admin can create, edit, publish, unpublish, and delete listings.
+- Public users see only published listings.
+- Support pagination, search, category filtering, and sorting.
+- Validate listing-specific fields.
+- Do not assume that ownership transfer or resale is permitted in every situation; include appropriate policy and eligibility checks in the business workflow.
+- Only allow listings for content or assets the seller is authorized to offer.
+
+### F. Site Settings
+
+Keep the website settings intentionally simple.
+
+Fields:
+- logo URL
+- footer phone number
+- footer email
+- WhatsApp support number
+- updatedAt
+
+Requirements:
+- A single managed settings document is sufficient.
+- Public API returns only these public settings.
+- Admin can update these values.
+- Validate phone numbers and email addresses.
+- Do not expose secrets through this model.
+- Use the current configured WhatsApp number for support-link generation on the frontend.
+
+## 7. Authentication and Authorization
+
+Implement secure admin authentication.
+
+Requirements:
+- Admin login
+- Logout/session invalidation according to the selected strategy
+- Password hashing
+- Access-token validation
+- Refresh-token handling if needed
+- Secure cookie settings when using cookies
+- Authentication middleware
+- Role/permission middleware
+- Account-active checks
+- Rate limiting for login
+- Safe handling of expired and invalid tokens
+
+Never store plaintext passwords.
+
+Never allow unauthenticated visitors to access admin APIs.
+
+Never trust a role supplied by the client.
+
+If using cookies, implement appropriate CSRF protections where necessary and configure credentials/CORS correctly.
+
+Use a controlled bootstrap process to create the first administrator. Do not expose a public admin-registration endpoint.
+
+## 8. API Contract
+
+Use a consistent versioned API prefix, such as `/api/v1`.
+
+Align endpoint naming, payloads, and response formats with the frontend project.
+
+Suggested public routes:
+
+Authentication:
+- POST `/api/v1/auth/admin/login`
+- POST `/api/v1/auth/admin/logout`
+- GET `/api/v1/auth/admin/me`
+
+Public packages:
+- GET `/api/v1/packages`
+- GET `/api/v1/packages/featured`
+- GET `/api/v1/packages/:slug`
+
+Public services:
+- GET `/api/v1/services`
+- GET `/api/v1/services/featured`
+- GET `/api/v1/services/:slug`
+
+Public marketplace:
+- GET `/api/v1/marketplace/channels`
+- GET `/api/v1/marketplace/channels/:slug`
+- GET `/api/v1/marketplace/videos`
+- GET `/api/v1/marketplace/videos/:slug`
+
+Public settings:
+- GET `/api/v1/site-settings`
+
+Checkout and orders:
+- POST `/api/v1/orders`
+- GET `/api/v1/orders/:orderNumber` only if the public lookup is protected by an appropriate unguessable identifier or verification mechanism
+
+Do not return sensitive customer information through an unrestricted public order endpoint.
+
+Admin dashboard:
+- GET `/api/v1/admin/dashboard`
+
+Admin package management:
+- GET `/api/v1/admin/packages`
+- POST `/api/v1/admin/packages`
+- PATCH `/api/v1/admin/packages/:id`
+- DELETE `/api/v1/admin/packages/:id`
+
+Admin service management:
+- GET `/api/v1/admin/services`
+- POST `/api/v1/admin/services`
+- PATCH `/api/v1/admin/services/:id`
+- DELETE `/api/v1/admin/services/:id`
+
+Admin order management:
+- GET `/api/v1/admin/orders`
+- GET `/api/v1/admin/orders/:id`
+- PATCH `/api/v1/admin/orders/:id/status`
+
+Admin marketplace management:
+- GET `/api/v1/admin/marketplace/channels`
+- POST `/api/v1/admin/marketplace/channels`
+- PATCH `/api/v1/admin/marketplace/channels/:id`
+- DELETE `/api/v1/admin/marketplace/channels/:id`
+- GET `/api/v1/admin/marketplace/videos`
+- POST `/api/v1/admin/marketplace/videos`
+- PATCH `/api/v1/admin/marketplace/videos/:id`
+- DELETE `/api/v1/admin/marketplace/videos/:id`
+
+Admin settings:
+- PATCH `/api/v1/admin/site-settings`
+
+You may adjust the exact endpoint structure to fit existing conventions, but document all changes and keep the frontend contract synchronized.
+
+Implement missing CRUD/listing endpoints needed for editing, publishing, unpublishing, and searching marketplace entries.
+
+For every endpoint, define:
+- HTTP method
+- Authentication requirements
+- Request validation
+- Response shape
+- Error responses
+- Pagination behavior where applicable
+
+## 9. API Response Conventions
+
+Use a consistent response structure.
+
+Successful response example:
+
+{
+  "success": true,
+  "data": {},
+  "message": "Operation completed successfully"
+}
+
+Error response example:
+
+{
+  "success": false,
+  "message": "A clear error message",
+  "errors": []
+}
+
+Adapt these examples to existing conventions if appropriate.
+
+Never return stack traces, internal database details, passwords, password hashes, tokens, or secrets to the client.
+
+Use correct HTTP status codes.
+
+## 10. Order Workflow
+
+Implement a clear order lifecycle.
+
+Possible statuses:
+- pending
+- processing
+- completed
+- cancelled
+
+Payment status should be modeled separately, for example:
+- unpaid
+- paid
+- failed
+- refunded
+
+Do not assume an order is paid just because it was submitted.
+
+Requirements:
+1. Receive checkout information.
+2. Validate the customer and order items.
+3. Fetch current prices from MongoDB.
+4. Calculate totals on the server.
+5. Create a unique order number.
+6. Save the order.
+7. Return the confirmed order number and safe order summary.
+8. Make the order immediately visible in the admin Orders route.
+9. Allow the admin to inspect the full order and update permitted statuses.
+10. Record status changes when appropriate.
+
+Do not implement an online payment gateway unless one is already configured or explicitly requested. Keep payment fields ready for future integration without fabricating successful payments.
+
+## 11. Admin Dashboard Statistics
+
+Implement an efficient endpoint for:
+- Total orders
+- Pending orders
+- Completed orders
+- Revenue summary
+- Recent orders
+
+Define the revenue calculation clearly. Only count successfully paid orders and exclude cancelled/refunded transactions according to the accounting rules.
+
+Use appropriate MongoDB aggregation pipelines and indexes. Avoid fetching every order just to calculate statistics.
+
+Use a documented date range or reporting period if needed.
+
+## 12. Image Uploads
+
+Use Cloudinary or another suitable managed storage service for package, service, logo, and marketplace images.
+
+Requirements:
+- Validate file type and size.
+- Store only the resulting asset URL and required metadata in MongoDB.
+- Protect upload endpoints with admin authorization.
+- Keep provider secrets on the server.
+- Never store large image binaries directly in MongoDB without a clear requirement.
+- Clean up replaced or deleted assets when safe and appropriate.
+
+If upload infrastructure is not configured, document the required environment variables and provide a safe implementation path without pretending uploads are working.
+
+## 13. Security Checklist
+
+Implement:
+- Helmet
+- Configured CORS allowlist
+- Rate limiting
+- Input validation
+- Mongoose schema validation
+- Sanitization and safe query handling
+- Authentication and authorization
+- Secure secrets management
+- Safe error handling
+- Request size limits
+- Login abuse protection
+- Protection against NoSQL injection
+- Server-side price calculations
+- Safe public order lookups
+- Admin-only mutations
+- Appropriate MongoDB indexes
+
+Never expose environment variables or privileged database credentials.
+
+## 14. Performance and Maintainability
+
+- Use pagination for large result sets.
+- Add appropriate indexes.
+- Avoid unnecessary database queries.
+- Use `.lean()` for read-only queries where appropriate.
+- Select only necessary fields.
+- Avoid N+1 query patterns.
+- Keep controllers small.
+- Move business logic into service modules where appropriate.
+- Use centralized error handling.
+- Avoid premature microservice architecture.
+- Preserve existing project conventions when reasonable.
+
+## 15. Environment Variables
+
+Document all required variables, as applicable:
+
+- `PORT`
+- `NODE_ENV`
+- `MONGODB_URI`
+- `FRONTEND_URL`
+- `JWT_SECRET` or the secrets required by the selected auth strategy
+- Token expiration settings
+- Cloudinary credentials if image upload is enabled
+
+Create a safe `.env.example` with placeholders only.
+
+Never print real credentials in logs or commit them to source control.
+
+## 16. Testing
+
+Implement and run suitable tests for:
+
+- MongoDB connection and model validation
+- Admin bootstrap
+- Login success and failure
+- Unauthorized admin access
+- Package CRUD
+- Service CRUD
+- Marketplace CRUD
+- Public listing filters and pagination
+- Checkout validation
+- Server-side price calculation
+- Invalid item IDs and quantities
+- Duplicate order submission
+- Order persistence
+- Admin order listing and details
+- Order status updates
+- Dashboard statistics and revenue calculation
+- Site settings read/update
+- Input-validation failures
+- CORS and error handling
+
+Use a test database or isolated test environment. Never run destructive tests against production data.
+
+Document tests that could not be run and explain why.
+
+## 17. Required TODO Roadmap
+
+Create and maintain a checklist:
+
+Phase 1: Repository analysis and architecture
+Phase 2: Environment configuration and MongoDB connection
+Phase 3: Models and validation schemas
+Phase 4: Admin authentication and authorization
+Phase 5: Public packages and services APIs
+Phase 6: Admin package/service CRUD
+Phase 7: Public marketplace APIs
+Phase 8: Admin marketplace management
+Phase 9: Checkout validation and order creation
+Phase 10: Admin order management
+Phase 11: Dashboard statistics and revenue aggregation
+Phase 12: Website settings API
+Phase 13: Image upload integration
+Phase 14: Security hardening
+Phase 15: Testing and API documentation
+Phase 16: Production-readiness audit
+
+Update the checklist as work progresses.
+
+## 18. Frontend Integration Deliverables
+
+Provide:
+- Complete endpoint documentation
+- Request and response examples
+- Authentication strategy and frontend requirements
+- Environment variable documentation
+- Pagination and filtering rules
+- Order status definitions
+- Error response conventions
+- Seed/bootstrap instructions
+- Local development instructions
+
+Ensure the frontend can integrate without guessing endpoint names or payload shapes.
+
+## 19. Final Constraints
+
+- Do not build fake endpoints or mock success responses in production code.
+- Do not hardcode production credentials.
+- Do not expose sensitive customer data.
+- Do not trust frontend-supplied prices.
+- Do not allow public admin registration.
+- Do not implement unrequested payment processing.
+- Do not silently skip incomplete features.
+- Do not unnecessarily rewrite unrelated files.
+- Preserve working features and existing conventions.
+- Fix regressions caused by your changes.
+- Keep the code modular, secure, and maintainable.
+
+Begin by analyzing the existing backend repository. Produce the architecture summary, API contract, and phased TODO checklist before implementing the first phase.

@@ -1,0 +1,448 @@
+# MASTER PROMPT — YOUTUBE MARKETPLACE FRONTEND
+
+## 1. Project Objective
+
+Build a complete, production-quality, responsive YouTube Marketplace website with a professional design and fully functional frontend.
+
+The platform will offer YouTube-related creator services, compliant audience-growth promotion packages, YouTube channel marketplace listings, and YouTube video marketplace listings.
+
+This is not a static UI demo. Every button, form, filter, cart action, navigation link, and admin control must work correctly and connect to the backend API.
+
+## 2. Mandatory Development Workflow
+
+Follow this workflow strictly:
+
+1. ANALYZE the existing project before changing anything.
+2. Identify the framework, dependencies, routes, components, styling conventions, environment variables, and existing functionality.
+3. Create a detailed implementation plan and a checklist/TODO roadmap.
+4. Identify API requirements and coordinate with the backend contract defined in the separate backend prompt.
+5. Implement one phase at a time.
+6. Test each completed phase before proceeding.
+7. Update the TODO checklist as tasks are completed.
+8. At the end of each phase, report completed tasks, tests, remaining issues, and the next phase.
+9. Do not claim a feature is complete unless it has been implemented and verified.
+10. Do not unnecessarily rewrite existing files or replace working functionality.
+
+Do not begin implementation until the analysis and plan are complete. After producing the plan, proceed with implementation without waiting for approval unless a genuine blocker exists.
+
+## 3. Technology Stack
+
+- Next.js App Router
+- React
+- TypeScript
+- Tailwind CSS
+- shadcn/ui where appropriate
+- lucide-react icons
+- react-hook-form and Zod where useful
+- A suitable notification library, reusing existing dependencies if available
+- Backend integration through a centralized typed API client
+- MongoDB is accessed ONLY through the backend API, never directly from the browser
+
+Reuse installed dependencies and existing conventions wherever possible. Avoid unnecessary libraries.
+
+## 4. Design Requirements
+
+Create a premium, modern, professional YouTube Marketplace UI.
+
+Visual direction:
+- Primary background: dark navy, approximately #050B14
+- Secondary background: #0B1220
+- Accent red: #FF1744
+- White service cards and clean light content sections
+- Neutral gray text and borders
+- Consistent typography, spacing, border radii, shadows, and hover states
+- Lucide icons instead of random emoji icons
+- High-quality thumbnails and properly optimized images
+- Subtle transitions and animations without harming performance
+
+The design should be inspired by the provided reference image but must be original, polished, and consistent across all pages.
+
+Do not make the entire website dark. Use a balanced combination of dark hero/header areas and clean, light service/package sections.
+
+## 5. Responsive Design
+
+Support:
+- Mobile phones
+- Tablets
+- Laptops
+- Large desktop screens
+
+Requirements:
+- Mobile navigation with a functional hamburger menu
+- Responsive service and package grids
+- Touch-friendly buttons and forms
+- Mobile-friendly cart and checkout
+- No horizontal overflow
+- Responsive images and typography
+- Accessible dialogs and dropdowns
+- Proper loading, empty, success, and error states
+
+Test at representative mobile, tablet, and desktop widths.
+
+## 6. Public Website Pages
+
+Implement these routes using the existing routing conventions:
+
+- `/` — Homepage
+- `/services` — All services
+- `/services/[slug]` — Service details
+- `/packages` — Subscriber/audience-growth packages
+- `/marketplace/channels` — Channel listings
+- `/marketplace/channels/[slug]` — Channel listing details
+- `/marketplace/videos` — Video listings
+- `/marketplace/videos/[slug]` — Video listing details
+- `/cart` — Shopping cart
+- `/checkout` — Checkout form
+- `/order-confirmation/[orderId]` — Order confirmation
+- `/about` — About page
+- `/contact` — Contact page
+- `/faq` — Frequently asked questions
+- `/privacy-policy` — Privacy policy
+- `/terms` — Terms and conditions
+- `/refund-policy` — Refund policy
+- `/cookie-policy` — Cookie policy
+- `/login` — Admin login if this is a single-admin platform
+- `/admin/*` — Protected admin interface
+
+Do not create a customer account system unless explicitly required. The initial order flow can be guest checkout.
+
+## 7. Homepage Layout
+
+Implement the following sections in order:
+
+1. Navbar
+2. Hero section
+3. Trust/benefits indicators
+4. MOST POPULAR subscriber/audience-growth packages
+5. Featured YouTube creator services
+6. YouTube channel marketplace preview
+7. YouTube video marketplace preview
+8. How It Works
+9. Testimonials, only when real content is available
+10. FAQ
+11. Contact/WhatsApp support CTA
+12. Footer
+
+The homepage should feel professional, balanced, and easy to navigate.
+
+### Navbar
+- Dynamic logo and brand information
+- Home
+- Services
+- Packages
+- Channel Marketplace
+- Video Marketplace
+- About
+- Contact
+- Search where useful
+- Cart icon with item count
+- Admin login link only where appropriate; do not expose privileged functionality
+
+### Hero Section
+- Strong headline and short supporting description
+- Primary CTA to explore packages
+- Secondary CTA to browse services
+- Professional creator/analytics visual
+- Responsive composition
+
+### Featured Packages
+This is the most important commercial section.
+
+Highlight it with a MOST POPULAR badge, red accents, polished pricing cards, and clear calls to action.
+
+Default seed/display prices:
+- 100 units: ৳160
+- 250 units: ৳400
+- 500 units: ৳800
+- 1,000 units: ৳1,600
+- 2,500 units: ৳4,000
+- 5,000 units: ৳8,000
+- 10,000 units: ৳16,000
+
+These are initial values only. The backend must be the source of truth for package prices. Never hardcode these prices as permanent frontend business logic.
+
+Only present packages as genuine audience-growth or compliant promotional services. Do not advertise fake subscribers, bots, guaranteed artificial engagement, or services that violate YouTube policies.
+
+### Services
+Support categories such as:
+- Thumbnail design
+- Video editing
+- Shorts editing
+- YouTube SEO
+- Channel audit
+- Banner design
+- Content strategy
+- Compliant creator promotion
+
+Each card should support:
+- Image
+- Name
+- Short description
+- Price or starting price
+- Featured badge
+- Details link
+- Add to Cart when purchasable
+
+Load content dynamically from the API.
+
+### Channel Marketplace
+- Listing cards with thumbnail/logo
+- Channel title
+- Category/niche
+- Publicly available statistics where verified
+- Asking price
+- Listing details
+- Contact seller or inquiry CTA
+- Search, filters, sorting, and pagination
+
+Do not imply that YouTube channel ownership transfers are automatically permitted. Show appropriate eligibility, ownership-transfer, and policy disclaimers.
+
+### Video Marketplace
+- Video thumbnail
+- Title
+- Category
+- Description
+- Price
+- Details page
+- Search, filters, and sorting
+- Clear indication of what rights or deliverables the purchase includes
+
+Do not promote copyright infringement or unauthorized resale.
+
+## 8. Shopping Cart
+
+Implement a real, functional cart.
+
+Requirements:
+- Add items
+- Remove items
+- Increase/decrease quantity where supported
+- Display current item prices and subtotals
+- Calculate totals correctly
+- Prevent invalid quantities
+- Show empty-cart state
+- Persist the cart locally across refreshes
+- Handle duplicate items consistently
+- Support navigation to checkout
+
+The cart is a convenience layer only. Backend-calculated prices and totals must always override client-submitted totals.
+
+Do not allow a visitor to submit arbitrary prices or manipulate the final order total.
+
+## 9. Checkout and Order Placement
+
+Implement guest checkout with:
+- Full name
+- Phone number
+- Email address
+- Selected package/service/listings
+- Quantity where applicable
+- YouTube channel/video URL when required
+- Additional instructions
+- Terms acceptance
+- Order summary
+
+Requirements:
+- Validate fields on the client
+- Display useful validation errors
+- Submit the order to the backend API
+- Prevent duplicate submissions
+- Show loading and failure states
+- Display the returned order ID after successful placement
+- Clear the cart only after successful order creation
+- Redirect to the order confirmation page
+- Never fabricate an order ID or display false success
+
+Use the backend contract for the exact request and response formats.
+
+Do not integrate a payment gateway unless one is already configured or separately requested. Support the backend's payment status fields without pretending that an order is paid.
+
+## 10. Admin Dashboard
+
+Create a professional, responsive admin layout with a sidebar, top navigation, page title, breadcrumbs where useful, and mobile navigation.
+
+Required admin sections:
+
+### A. Dashboard Overview
+- Total orders
+- Pending orders
+- Completed orders
+- Revenue summary
+- Recent orders
+- Loading and empty states
+
+Use real backend data. Never use hardcoded dashboard statistics.
+
+Revenue must follow the backend's defined accounting rules and must not count unpaid or cancelled orders as paid revenue.
+
+### B. Package & Service Management
+- List packages/services
+- Create new entries
+- Edit existing entries
+- Delete with confirmation
+- Update price
+- Update title and description
+- Upload/select image
+- Change featured status
+- Activate/deactivate entries
+- Configure package quantity and pricing
+- Search and pagination
+
+The frontend must reflect successful changes after API confirmation.
+
+### C. Orders Management
+- List orders
+- Search by order ID, customer name, or contact details
+- Filter by status and date
+- View complete order details
+- View customer information and order items
+- View quantity, totals, and payment status
+- Update order status using permitted backend actions
+- Show success/error feedback
+
+Do not permit unauthorized or invalid state transitions.
+
+### D. Marketplace Management
+- Create channel listings
+- Edit listing information
+- Create video listings
+- Edit listings
+- Publish/unpublish
+- Delete with confirmation
+- Update titles, descriptions, categories, images, and prices
+- Search and filter listings
+
+### E. Basic Website Settings
+Only the following settings are required:
+- Navbar logo
+- Footer phone number
+- Footer email address
+- WhatsApp support number
+
+Do not build a complex page builder or unnecessary CMS.
+
+The WhatsApp contact button must use the current configured number, not a hardcoded number.
+
+## 11. Admin Authentication and Route Protection
+
+- Implement the login flow against the backend authentication API.
+- Protect all admin pages.
+- Handle expired sessions and unauthorized API responses.
+- Redirect unauthenticated visitors to login.
+- Never rely on frontend route hiding as the only security control.
+- Do not store admin passwords in source code or commit credentials.
+- Never place backend secrets in `NEXT_PUBLIC_*` environment variables.
+- Follow the backend's documented token/cookie strategy.
+
+The backend must enforce all permissions independently.
+
+## 12. API Integration
+
+Create a centralized API client and typed interfaces for:
+- Authentication
+- Packages
+- Services
+- Channel listings
+- Video listings
+- Cart/checkout/order creation
+- Admin dashboard statistics
+- Admin order management
+- Website settings
+
+Requirements:
+- Read the API base URL from an environment variable such as `NEXT_PUBLIC_API_URL`.
+- Handle network errors consistently.
+- Handle loading, empty, and error states.
+- Avoid duplicated fetch logic.
+- Avoid unnecessary requests and excessive rerenders.
+- Use pagination for large lists.
+- Never connect directly to MongoDB from the frontend.
+
+Do not invent endpoints if the backend already defines them. If the backend is not yet available, use a clearly documented temporary API contract and keep integration isolated.
+
+## 13. Performance, Accessibility, and SEO
+
+- Use Next.js features appropriately.
+- Optimize images.
+- Minimize client components where possible.
+- Avoid unnecessary dependencies.
+- Use semantic HTML.
+- Add accessible labels and keyboard navigation.
+- Use meaningful page titles and meta descriptions.
+- Add canonical URLs where appropriate.
+- Implement appropriate Open Graph metadata.
+- Avoid fake reviews, fabricated trust statistics, or misleading claims.
+- Add loading feedback for actions and skeletons where useful.
+
+## 14. Environment Configuration
+
+Document the required frontend environment variables, including:
+
+`NEXT_PUBLIC_API_URL`
+
+Never include private backend secrets in the frontend environment.
+
+Provide a safe `.env.example` without real credentials.
+
+## 15. Testing and Final Verification
+
+Test:
+- All public routes
+- Navbar and footer links
+- Mobile menu
+- Package/service API loading
+- Cart calculations
+- Quantity validation
+- Checkout validation
+- Successful order submission
+- Failed order submission
+- Duplicate-submit prevention
+- Admin login/logout
+- Admin route protection
+- Package/service CRUD UI
+- Marketplace CRUD UI
+- Orders filtering and status updates
+- Website settings updates
+- Responsive layouts
+- Production build
+
+Use existing test tooling or introduce minimal appropriate tooling.
+
+Do not mark tests as passed unless they actually ran successfully.
+
+## 16. Required TODO Roadmap
+
+Create and maintain a checklist covering:
+
+Phase 1: Project analysis and architecture
+Phase 2: Design system and reusable UI components
+Phase 3: Navbar, footer, and homepage
+Phase 4: Packages and service pages
+Phase 5: Channel and video marketplace
+Phase 6: Cart and checkout
+Phase 7: Order confirmation
+Phase 8: Admin layout and authentication integration
+Phase 9: Dashboard overview
+Phase 10: Package/service management
+Phase 11: Order management
+Phase 12: Marketplace management
+Phase 13: Basic website settings
+Phase 14: API integration and error handling
+Phase 15: Responsive, accessibility, and SEO improvements
+Phase 16: Testing, production build, and final audit
+
+Update the checklist as implementation progresses.
+
+## 17. Final Constraints
+
+- Do not build a static mockup in place of working functionality.
+- Do not hardcode dynamic business data.
+- Do not invent backend success responses.
+- Do not change API contracts without coordination.
+- Do not unnecessarily modify unrelated files.
+- Reuse existing components and conventions.
+- Fix errors introduced by your changes.
+- Keep the code maintainable and production-oriented.
+- If a genuine blocker exists, explain it clearly rather than silently skipping the feature.
+
+Begin by analyzing the existing frontend project, then produce the architecture summary and phased TODO checklist before implementing anything.

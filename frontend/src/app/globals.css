@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-primary: #050B14;
+    --bg-secondary: #0B1220;
+    --bg-card-dark: #0E1726;
+    --bg-card-light: #FFFFFF;
+    --accent-red: #FF1744;
+    --accent-red-hover: #E00034;
+    --text-primary: #F8FAFC;
+    --text-muted: #94A3B8;
+    --border-dark: #1E293B;
+  }
+
+  body {
+    background-color: #050B14;
+    color: #F8FAFC;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0B1220;
+}
+::-webkit-scrollbar-thumb {
+  background: #1E293B;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Glassmorphism helpers */
+.glass-nav {
+  background: rgba(5, 11, 20, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(14, 23, 38, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Glow effects */
+.glow-red {
+  box-shadow: 0 0 25px -5px rgba(255, 23, 68, 0.4);
+}
+
+.glow-red-sm {
+  box-shadow: 0 0 15px -3px rgba(255, 23, 68, 0.3);
+}
