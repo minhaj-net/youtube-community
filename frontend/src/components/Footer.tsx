@@ -6,13 +6,14 @@ import { Mail, Phone, MessageSquare, ShieldCheck, CheckCircle2, ArrowRight } fro
 import { YoutubeIcon } from '@/components/icons/YoutubeIcon';
 import { api } from '@/lib/api';
 import { SiteSettings } from '@/types';
+import { useQuery } from '@/lib/queryClient';
+import { QUERY_KEYS } from '@/lib/prefetch';
 
 export function Footer() {
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
-
-  useEffect(() => {
-    api.getSiteSettings().then(setSettings).catch(() => {});
-  }, []);
+  const { data: settings } = useQuery<SiteSettings>(
+    QUERY_KEYS.SITE_SETTINGS,
+    () => api.getSiteSettings()
+  );
 
   const phone = settings?.footerPhone || '+880 1700-000000';
   const email = settings?.footerEmail || 'support@ytmarket.com';

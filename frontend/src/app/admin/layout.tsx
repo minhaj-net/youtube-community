@@ -51,7 +51,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const menuItems = [
-    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+    { name: 'Dashboard', href: '/dashboard/admin', icon: LayoutDashboard },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
     { name: 'Packages', href: '/admin/packages', icon: Package },
     { name: 'Services', href: '/admin/services', icon: Layers },
@@ -61,7 +61,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   const isActive = (href: string) => {
-    if (href === '/admin') return pathname === '/admin';
+    if (href === '/dashboard/admin') return pathname === '/dashboard/admin' || pathname === '/admin';
     return pathname.startsWith(href);
   };
 

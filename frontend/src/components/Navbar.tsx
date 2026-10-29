@@ -20,18 +20,31 @@ import { useAuth } from '@/context/AuthContext';
 import { useUserAuth } from '@/context/UserAuthContext';
 import { api } from '@/lib/api';
 import { SiteSettings } from '@/types';
+import { useQuery } from '@/lib/queryClient';
+import { prefetch, QUERY_KEYS } from '@/lib/prefetch';
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
+  const { data: siteSettings } = useQuery<SiteSettings>(QUERY_KEYS.SITE_SETTINGS, () => api.getSiteSettings());
   const pathname = usePathname();
   const { totalCount } = useCart();
   const { isAuthenticated: isAdminAuth } = useAuth();
   const { isAuthenticated: isUserAuth, user } = useUserAuth();
 
   useEffect(() => {
-    api.getSiteSettings().then(setSiteSettings).catch(() => {});
+    // Warm up frequently needed public catalog cache during idle time
+    const timer = setTimeout(() => {
+      prefetch.allPublicCatalogs();
+    }, 1000);
+    return () => clearTimeout(timer);
   }, []);
+
+  const handleLinkPrefetch = (href: string) => {
+    if (href === '/packages') prefetch.packages();
+    else if (href === '/services') prefetch.services();
+    else if (href === '/marketplace/channels') prefetch.channels();
+    else if (href === '/marketplace/videos') prefetch.videos();
+  };
 
   const navLinks = [
     { name: 'Home', href: '/' },
@@ -75,11 +88,12 @@ export function Navbar() {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    active
-                      ? 'text-white bg-white/10 shadow-sm'
-                      : 'text-slate-300 hover:text-white hover:bg-white/5'
-                  }`}
+                  onMouseEnter={() => handleLinkPrefetch(link.href)}
+                  onTouchStart={() => handleLinkPrefetch(link.href)}
+                  className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors ${active
+                    ? 'text-white bg-white/10 shadow-sm'
+                    : 'text-slate-300 hover:text-white hover:bg-white/5'
+                    }`}
                 >
                   <span className="flex items-center gap-1.5">
                     {link.name}
@@ -94,56 +108,64 @@ export function Navbar() {
             })}
           </nav>
 
-            {/* Action Area: Cart, User Dashboard, & Admin */}
-            <div className="flex items-center gap-2.5">
-              <Link
-                href="/cart"
-                className="relative p-2.5 rounded-xl bg-[#0E1726] border border-slate-800 text-slate-200 hover:text-white hover:border-[#FF1744]/40 transition group"
-                aria-label="View Shopping Cart"
-              >
-                <ShoppingBag className="w-5 h-5 group-hover:scale-110 transition duration-150" />
-                {totalCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-[#FF1744] text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
-                    {totalCount}
-                  </span>
-                )}
-              </Link>
-
-              {/* User Dashboard / Sign In & Sign Up */}
-              {isUserAuth ? (
-                <Link
-                  href="/dashboard"
-                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#FF1744]/10 text-[#FF1744] border border-[#FF1744]/30 hover:bg-[#FF1744]/20 transition"
-                >
-                  <UserCheck className="w-3.5 h-3.5" />
-                  <span>My Orders</span>
-                </Link>
-              ) : (
-                <div className="hidden sm:flex items-center gap-2">
-                  <Link
-                    href="/login?mode=login"
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition"
-                  >
-                    <span>Sign In</span>
-                  </Link>
-                  <Link
-                    href="/login?mode=register"
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[#FF1744] hover:bg-[#E00034] text-white shadow-md shadow-red-500/20 transition"
-                  >
-                    <span>Sign Up</span>
-                  </Link>
-                </div>
+          {/* Action Area: Cart, User Dashboard, & Admin */}
+          <div className="flex items-center gap-2.5">
+            <Link
+              href="/cart"
+              className="relative p-2.5 rounded-xl bg-[#0E1726] border border-slate-800 text-slate-200 hover:text-white hover:border-[#FF1744]/40 transition group"
+              aria-label="View Shopping Cart"
+            >
+              <ShoppingBag className="w-5 h-5 group-hover:scale-110 transition duration-150" />
+              {totalCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-[#FF1744] text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                  {totalCount}
+                </span>
               )}
+            </Link>
 
-              {/* Mobile Hamburger Button */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-2.5 rounded-xl bg-[#0E1726] border border-slate-800 text-slate-300 hover:text-white"
-                aria-label="Toggle Navigation Menu"
+            {/* User Dashboard / Admin Dashboard / Sign In & Sign Up */}
+            {isAdminAuth || user?.role === 'admin' || user?.role === 'superadmin' || user?.isAdmin ? (
+              <Link
+                href="/dashboard/admin"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#FF1744] text-white shadow-md shadow-red-500/20 hover:bg-[#E00034] transition"
               >
-                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
-            </div>
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Admin Dashboard</span>
+              </Link>
+            ) : isUserAuth ? (
+              <Link
+                href="/dashboard/user"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#FF1744]/10 text-[#FF1744] border border-[#FF1744]/30 hover:bg-[#FF1744]/20 transition"
+              >
+                <UserCheck className="w-3.5 h-3.5" />
+                <span>My Orders</span>
+              </Link>
+            ) : (
+              <div className="hidden sm:flex items-center gap-2">
+                <Link
+                  href="/login?mode=login"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition"
+                >
+                  <span>Sign In</span>
+                </Link>
+                <Link
+                  href="/login?mode=register"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[#FF1744] hover:bg-[#E00034] text-white shadow-md shadow-red-500/20 transition"
+                >
+                  <span>Sign Up</span>
+                </Link>
+              </div>
+            )}
+
+            {/* Mobile Hamburger Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2.5 rounded-xl bg-[#0E1726] border border-slate-800 text-slate-300 hover:text-white"
+              aria-label="Toggle Navigation Menu"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -157,12 +179,12 @@ export function Navbar() {
                 <Link
                   key={link.name}
                   href={link.href}
+                  onTouchStart={() => handleLinkPrefetch(link.href)}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition ${
-                    active
-                      ? 'bg-[#FF1744]/10 text-[#FF1744] border border-[#FF1744]/20'
-                      : 'text-slate-200 hover:bg-slate-800/50'
-                  }`}
+                  className={`flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition ${active
+                    ? 'bg-[#FF1744]/10 text-[#FF1744] border border-[#FF1744]/20'
+                    : 'text-slate-200 hover:bg-slate-800/50'
+                    }`}
                 >
                   <span>{link.name}</span>
                   {link.badge && (
@@ -188,9 +210,17 @@ export function Navbar() {
                   {totalCount} items
                 </span>
               </Link>
-              {isUserAuth ? (
+              {isAdminAuth || user?.role === 'admin' || user?.role === 'superadmin' || user?.isAdmin ? (
                 <Link
-                  href="/dashboard"
+                  href="/dashboard/admin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-4 py-3 rounded-xl text-center text-sm font-bold bg-[#FF1744] text-white shadow-md shadow-red-500/20"
+                >
+                  Admin Dashboard
+                </Link>
+              ) : isUserAuth ? (
+                <Link
+                  href="/dashboard/user"
                   onClick={() => setMobileMenuOpen(false)}
                   className="px-4 py-3 rounded-xl text-center text-sm font-bold bg-[#FF1744]/15 text-[#FF1744] border border-[#FF1744]/30"
                 >

@@ -1,9 +1,14 @@
 const mongoose = require('mongoose');
 const dns = require('node:dns');
+const { ensureDefaultAdmin } = require('../utils/seedAdmin');
 
-try {
-  dns.setServers(['1.1.1.1', '8.8.8.8']);
-} catch (e) {}
+// On cloud serverless platforms (Vercel/AWS), use the native VPC resolver.
+// Only apply public DNS override in local development if needed.
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  try {
+    dns.setServers(['1.1.1.1', '8.8.8.8']);
+  } catch (e) { }
+}
 
 // Global cached connection for serverless execution environments
 let cached = global.mongoose;
@@ -26,8 +31,13 @@ const connectDB = async () => {
 
     cached.promise = mongoose
       .connect(process.env.MONGODB_URI, opts)
-      .then((m) => {
+      .then(async (m) => {
         console.log(`✅ MongoDB connected: ${m.connection.host}`);
+        try {
+          await ensureDefaultAdmin();
+        } catch (e) {
+          console.error('[Admin] ensureDefaultAdmin error:', e.message);
+        }
         return m;
       })
       .catch((err) => {

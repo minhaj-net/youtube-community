@@ -7,6 +7,8 @@ import { ServiceCard } from '@/components/ServiceCard';
 import { api } from '@/lib/api';
 import { ServiceItem } from '@/types';
 import { Search, SlidersHorizontal, Sparkles, AlertCircle, RefreshCw } from 'lucide-react';
+import { useQuery } from '@/lib/queryClient';
+import { QUERY_KEYS } from '@/lib/prefetch';
 
 const CATEGORIES = [
   'All',
@@ -19,29 +21,16 @@ const CATEGORIES = [
 ];
 
 export default function ServicesPage() {
-  const [services, setServices] = useState<ServiceItem[]>([]);
+  const {
+    data: services = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery<ServiceItem[]>(QUERY_KEYS.SERVICES, () => api.getServices());
+
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc'>('featured');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchServices = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await api.getServices();
-      setServices(data);
-    } catch (err: any) {
-      setError(err?.message || 'Failed to load services from database.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchServices();
-  }, []);
 
   const filteredServices = useMemo(() => {
     let result = [...services];
@@ -150,9 +139,9 @@ export default function ServicesPage() {
                 <AlertCircle className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Unable to load services</h3>
-              <p className="text-slate-400 text-sm max-w-md mb-6">{error}</p>
+              <p className="text-slate-400 text-sm max-w-md mb-6">{error?.message || 'Server error occurred'}</p>
               <button
-                onClick={fetchServices}
+                onClick={() => refetch()}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#FF1744] text-white font-bold text-xs shadow-lg shadow-red-500/20 transition cursor-pointer"
               >
                 <RefreshCw className="w-4 h-4" />

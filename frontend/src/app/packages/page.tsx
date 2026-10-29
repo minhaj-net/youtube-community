@@ -8,28 +8,16 @@ import { PackageCard } from '@/components/PackageCard';
 import { api } from '@/lib/api';
 import { PackageItem } from '@/types';
 import { Sparkles, ShieldCheck, CheckCircle2, Zap, HelpCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { useQuery } from '@/lib/queryClient';
+import { QUERY_KEYS } from '@/lib/prefetch';
 
 export default function PackagesPage() {
-  const [packages, setPackages] = useState<PackageItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchPackages = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await api.getPackages();
-      setPackages(data);
-    } catch (err: any) {
-      setError(err?.message || 'Failed to load growth packages from database.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPackages();
-  }, []);
+  const {
+    data: packages = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery<PackageItem[]>(QUERY_KEYS.PACKAGES, () => api.getPackages());
 
   return (
     <div className="min-h-screen flex flex-col bg-[#050B14]">
@@ -78,9 +66,9 @@ export default function PackagesPage() {
                 <AlertCircle className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Unable to load packages</h3>
-              <p className="text-slate-400 text-sm max-w-md mb-6">{error}</p>
+              <p className="text-slate-400 text-sm max-w-md mb-6">{error?.message || 'Server error occurred'}</p>
               <button
-                onClick={fetchPackages}
+                onClick={() => refetch()}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#FF1744] text-white font-bold text-xs shadow-lg shadow-red-500/20 transition cursor-pointer"
               >
                 <RefreshCw className="w-4 h-4" />

@@ -7,31 +7,20 @@ import { ChannelCard } from '@/components/ChannelCard';
 import { api } from '@/lib/api';
 import { ChannelListing } from '@/types';
 import { Search, ShieldCheck, DollarSign, Users, Info, AlertCircle, RefreshCw } from 'lucide-react';
+import { useQuery } from '@/lib/queryClient';
+import { QUERY_KEYS } from '@/lib/prefetch';
 
 export default function ChannelsMarketplacePage() {
-  const [channels, setChannels] = useState<ChannelListing[]>([]);
+  const {
+    data: channels = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery<ChannelListing[]>(QUERY_KEYS.CHANNELS, () => api.getChannels());
+
   const [searchQuery, setSearchQuery] = useState('');
   const [monetizedOnly, setMonetizedOnly] = useState(false);
   const [selectedNiche, setSelectedNiche] = useState('All');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchChannels = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await api.getChannels();
-      setChannels(data);
-    } catch (err: any) {
-      setError(err?.message || 'Failed to load channels from database.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchChannels();
-  }, []);
 
   const niches = ['All', 'Tech & Gadgets', 'Gaming', 'Food & Lifestyle', 'Personal Finance'];
 
@@ -126,9 +115,9 @@ export default function ChannelsMarketplacePage() {
                 <AlertCircle className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Unable to load channels</h3>
-              <p className="text-slate-400 text-sm max-w-md mb-6">{error}</p>
+              <p className="text-slate-400 text-sm max-w-md mb-6">{error?.message || 'Server error occurred'}</p>
               <button
-                onClick={fetchChannels}
+                onClick={() => refetch()}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#FF1744] text-white font-bold text-xs shadow-lg shadow-red-500/20 transition cursor-pointer"
               >
                 <RefreshCw className="w-4 h-4" />
