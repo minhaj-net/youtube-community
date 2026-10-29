@@ -29,36 +29,28 @@ import { ChannelCard } from '@/components/ChannelCard';
 import { VideoCard } from '@/components/VideoCard';
 import { api } from '@/lib/api';
 import { PackageItem, ServiceItem, ChannelListing, VideoListing } from '@/types';
+import { useQuery } from '@/lib/queryClient';
+import { QUERY_KEYS } from '@/lib/prefetch';
 
 export default function HomePage() {
-  const [packages, setPackages] = useState<PackageItem[]>([]);
-  const [services, setServices] = useState<ServiceItem[]>([]);
-  const [channels, setChannels] = useState<ChannelListing[]>([]);
-  const [videos, setVideos] = useState<VideoListing[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const { data: packages = [], isLoading: packagesLoading } = useQuery<PackageItem[]>(
+    QUERY_KEYS.PACKAGES,
+    () => api.getPackages()
+  );
+  const { data: services = [], isLoading: servicesLoading } = useQuery<ServiceItem[]>(
+    QUERY_KEYS.SERVICES_FEATURED,
+    () => api.getFeaturedServices()
+  );
+  const { data: channels = [], isLoading: channelsLoading } = useQuery<ChannelListing[]>(
+    QUERY_KEYS.CHANNELS,
+    () => api.getChannels()
+  );
+  const { data: videos = [], isLoading: videosLoading } = useQuery<VideoListing[]>(
+    QUERY_KEYS.VIDEOS,
+    () => api.getVideos()
+  );
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [pkgs, srvs, chns, vids] = await Promise.all([
-          api.getPackages().catch(() => []),
-          api.getFeaturedServices().catch(() => []),
-          api.getChannels().catch(() => []),
-          api.getVideos().catch(() => []),
-        ]);
-        setPackages(pkgs);
-        setServices(srvs);
-        setChannels(chns);
-        setVideos(vids);
-      } catch (err) {
-        console.error('Failed to load homepage data', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, []);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const faqs = [
     {
@@ -278,7 +270,7 @@ export default function HomePage() {
             </div>
 
             {/* Grid of Packages */}
-            {loading ? (
+            {packagesLoading ? (
               <div className="flex items-center justify-center py-16 bg-[#091120] rounded-3xl border border-slate-800">
                 <div className="w-8 h-8 border-4 border-[#FF1744] border-t-transparent rounded-full animate-spin" />
               </div>
@@ -333,7 +325,7 @@ export default function HomePage() {
             </div>
 
             {/* Clean Light-surface Cards Section for Visual Contrast */}
-            {loading ? (
+            {servicesLoading ? (
               <div className="flex items-center justify-center py-16 bg-[#091120] rounded-3xl border border-slate-800">
                 <div className="w-8 h-8 border-4 border-[#FF1744] border-t-transparent rounded-full animate-spin" />
               </div>
@@ -376,7 +368,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {loading ? (
+            {channelsLoading ? (
               <div className="flex items-center justify-center py-16 bg-[#091120] rounded-3xl border border-slate-800">
                 <div className="w-8 h-8 border-4 border-[#FF1744] border-t-transparent rounded-full animate-spin" />
               </div>
@@ -419,7 +411,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {loading ? (
+            {videosLoading ? (
               <div className="flex items-center justify-center py-16 bg-[#091120] rounded-3xl border border-slate-800">
                 <div className="w-8 h-8 border-4 border-[#FF1744] border-t-transparent rounded-full animate-spin" />
               </div>

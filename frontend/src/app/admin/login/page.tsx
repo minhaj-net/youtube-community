@@ -17,10 +17,10 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // If already authenticated as admin, go straight to /admin
+  // If already authenticated as admin, go straight to /dashboard/admin
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.replace('/admin');
+      router.replace('/dashboard/admin');
     }
   }, [isLoading, isAuthenticated, router]);
 
@@ -35,7 +35,7 @@ export default function AdminLoginPage() {
     try {
       await login(email.trim(), password);
       toastSuccess('Administrator authenticated successfully. Welcome to TubeBoost Console!');
-      router.replace('/admin');
+      router.replace('/dashboard/admin');
     } catch (err: any) {
       toastError(err?.message || 'Invalid administrator credentials. Access denied.');
     } finally {
