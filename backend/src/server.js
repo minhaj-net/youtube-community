@@ -1,9 +1,12 @@
 require('dotenv').config();
 const app = require('./app');
 const connectDB = require('./config/database');
-const { setServers } = require("node:dns/promises");
-
-setServers(["1.1.1.1", "8.8.8.8"]);
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  try {
+    const { setServers } = require("node:dns/promises");
+    setServers(["1.1.1.1", "8.8.8.8"]);
+  } catch (e) {}
+}
 
 
 

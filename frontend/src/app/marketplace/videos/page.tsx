@@ -7,30 +7,19 @@ import { VideoCard } from '@/components/VideoCard';
 import { api } from '@/lib/api';
 import { VideoListing } from '@/types';
 import { Search, Film, ShieldCheck, AlertCircle, RefreshCw } from 'lucide-react';
+import { useQuery } from '@/lib/queryClient';
+import { QUERY_KEYS } from '@/lib/prefetch';
 
 export default function VideosMarketplacePage() {
-  const [videos, setVideos] = useState<VideoListing[]>([]);
+  const {
+    data: videos = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery<VideoListing[]>(QUERY_KEYS.VIDEOS, () => api.getVideos());
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchVideos = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await api.getVideos();
-      setVideos(data);
-    } catch (err: any) {
-      setError(err?.message || 'Failed to load video assets from database.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchVideos();
-  }, []);
 
   const categories = ['All', 'Cinematic B-Roll', 'Turnkey Faceless Videos', 'Nature & Landscapes'];
 
@@ -111,9 +100,9 @@ export default function VideosMarketplacePage() {
                 <AlertCircle className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Unable to load videos</h3>
-              <p className="text-slate-400 text-sm max-w-md mb-6">{error}</p>
+              <p className="text-slate-400 text-sm max-w-md mb-6">{error?.message || 'Server error occurred'}</p>
               <button
-                onClick={fetchVideos}
+                onClick={() => refetch()}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#FF1744] text-white font-bold text-xs shadow-lg shadow-red-500/20 transition cursor-pointer"
               >
                 <RefreshCw className="w-4 h-4" />

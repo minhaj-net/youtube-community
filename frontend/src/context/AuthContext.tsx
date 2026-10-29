@@ -23,21 +23,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function checkAuth() {
       try {
-        const user = await api.adminGetMe();
-        if (user) {
-          setAdmin(user);
+        const token = localStorage.getItem('token') || localStorage.getItem('user_token');
+        if (!token) {
+          setAdmin(null);
+          setIsLoading(false);
+          return;
         }
-      } catch {
-        setAdmin(null);
-      } finally {
-        setIsLoading(false);
+        const user = await api.adminGetMe();
+          if (user && (user.role === 'admin' || user.role === 'superadmin')) {
+            setAdmin(user);
+          } else {
+            setAdmin(null);
+          }
+        } catch {
+          setAdmin(null);
+        } finally {
+          setIsLoading(false);
+        }
       }
-    }
     checkAuth();
-  }, []);
+    }, []);
 
   const login = async (email: string, pass: string) => {
     const res = await api.adminLogin(email, pass);
+    if (res.token) {
+      localStorage.setItem('token', res.token);
+      localStorage.setItem('user_token', res.token);
+      localStorage.setItem('yt_admin_session', JSON.stringify(res.admin));
+      localStorage.setItem(
+        'user_profile',
+        JSON.stringify({
+          id: res.admin.id,
+          name: 'Administrator',
+          email: res.admin.email,
+          role: res.admin.role,
+          isAdmin: true,
+        })
+      );
+    }
     setAdmin(res.admin);
   };
 
@@ -48,6 +71,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // ignore
     } finally {
       localStorage.removeItem('token');
+      localStorage.removeItem('user_token');
+      localStorage.removeItem('user_profile');
       localStorage.removeItem('yt_admin_session');
       sessionStorage.clear();
       setAdmin(null);

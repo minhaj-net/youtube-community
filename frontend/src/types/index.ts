@@ -130,9 +130,17 @@ export interface SiteSettings {
 export interface DashboardStats {
   totalOrders: number;
   pendingOrders: number;
+  processingOrders?: number;
   completedOrders: number;
+  cancelledOrders?: number;
   revenue: number;
   recentOrders: Order[];
+  catalog?: {
+    packages: number;
+    services: number;
+    channels: number;
+    videos: number;
+  };
 }
 
 export interface AdminUser {
